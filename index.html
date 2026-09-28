@@ -6,26 +6,44 @@
 <title>英語 並べ替え問題</title>
 <style>
   :root {
-    --bg: #f4f6fb;
+    --bg: #fff5fa;
     --panel: #ffffff;
-    --text: #1f2933;
-    --muted: #5f6b7a;
-    --line: #d6dce6;
-    --accent: #2f6fde;
-    --accent-dark: #1f55b3;
+    --text: #3d3450;
+    --muted: #7a6d8c;
+    --line: #f0e3f5;
+    --accent: #c2417f;
+    --accent-dark: #a8336c;
+    --accent-2: #8a5cd6;
     --card: #ffffff;
-    --card-border: #b9c6dc;
-    --answer-bg: #eef3fd;
-    --ok: #1d9a5b;
-    --ok-bg: #e5f6ec;
-    --ng: #d64545;
-    --ng-bg: #fdeaea;
+    --card-border: #e8d8f2;
+    --answer-bg: #fdf6ff;
+    --answer-border: #d9b8f0;
+    --ok: #1f8a57;
+    --ok-bg: #e3f8ec;
+    --ok-border: #8fdcb1;
+    --ng: #c73c5a;
+    --ng-bg: #ffe9ee;
+    --ng-border: #f5a3b5;
+    /* カードのパステルカラー */
+    --p1: #ffd6e5; --p1b: #f5a8c6;
+    --p2: #ffe3c7; --p2b: #f5bf8a;
+    --p3: #fff4bd; --p3b: #eed56b;
+    --p4: #d4f5e2; --p4b: #92d9b1;
+    --p5: #d6ecff; --p5b: #95c6f0;
+    --p6: #e7dcff; --p6b: #b9a0ee;
   }
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
+    min-height: 100vh;
     background: var(--bg);
+    background-image:
+      radial-gradient(circle at 10% 8%, #ffe0ee 0, transparent 38%),
+      radial-gradient(circle at 92% 20%, #e3f1ff 0, transparent 36%),
+      radial-gradient(circle at 15% 88%, #e2f8ec 0, transparent 38%),
+      radial-gradient(circle at 88% 85%, #fff3c9 0, transparent 36%);
+    background-attachment: fixed;
     color: var(--text);
     font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
     line-height: 1.6;
@@ -36,10 +54,16 @@
     padding: 16px 16px 40px;
   }
   header h1 {
-    font-size: 1.25rem;
-    margin: 4px 0 12px;
+    font-size: 1.35rem;
+    margin: 6px 0 14px;
     text-align: center;
+    letter-spacing: .04em;
+    background: linear-gradient(90deg, #d9468f, #8a5cd6 55%, #3f8fd9);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
+  header h1 .deco { color: initial; -webkit-text-fill-color: initial; font-size: 1.1rem; }
   .progress {
     display: flex;
     align-items: center;
@@ -50,8 +74,9 @@
   }
   .bar {
     flex: 1;
-    height: 8px;
-    background: var(--line);
+    height: 12px;
+    background: #fff;
+    box-shadow: inset 0 0 0 2px var(--line);
     border-radius: 999px;
     overflow: hidden;
   }
@@ -59,19 +84,25 @@
     display: block;
     height: 100%;
     width: 0;
-    background: var(--accent);
-    transition: width .3s;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ffa8c9, #c7a8ff, #9fd4ff, #9fe3bf);
+    transition: width .4s;
   }
   .panel {
     background: var(--panel);
-    border-radius: 14px;
-    padding: 18px 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    border-radius: 22px;
+    padding: 20px 16px;
+    box-shadow: 0 6px 20px rgba(200, 120, 180, .15);
+    border: 2px solid #fbe7f3;
   }
   .qno {
+    display: inline-block;
     font-weight: bold;
-    color: var(--accent);
-    font-size: 0.95rem;
+    color: #fff;
+    background: linear-gradient(90deg, #d9468f, #8a5cd6);
+    border-radius: 999px;
+    padding: 2px 14px;
+    font-size: 0.9rem;
   }
   .ja {
     font-size: 1.1rem;
@@ -85,9 +116,9 @@
   }
   .answer {
     min-height: 64px;
-    border: 2px dashed var(--card-border);
+    border: 3px dashed var(--answer-border);
     background: var(--answer-bg);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 8px;
     display: flex;
     flex-wrap: wrap;
@@ -95,8 +126,8 @@
     gap: 8px;
     margin-bottom: 16px;
   }
-  .answer.ok { border-style: solid; border-color: var(--ok); background: var(--ok-bg); }
-  .answer.ng { border-style: solid; border-color: var(--ng); background: var(--ng-bg); }
+  .answer.ok { border-style: solid; border-color: var(--ok-border); background: var(--ok-bg); }
+  .answer.ng { border-style: solid; border-color: var(--ng-border); background: var(--ng-bg); }
   .placeholder {
     color: var(--muted);
     font-size: 0.85rem;
@@ -122,8 +153,9 @@
     background: var(--card);
     border: 2px solid var(--card-border);
     border-bottom-width: 4px;
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 8px 14px;
+    box-shadow: 0 2px 0 rgba(0,0,0,.04);
     min-height: 48px;
     min-width: 48px;
     cursor: pointer;
@@ -131,10 +163,16 @@
     -webkit-tap-highlight-color: transparent;
     transition: transform .08s;
   }
+  .card.c0 { background: var(--p1); border-color: var(--p1b); }
+  .card.c1 { background: var(--p2); border-color: var(--p2b); }
+  .card.c2 { background: var(--p3); border-color: var(--p3b); }
+  .card.c3 { background: var(--p4); border-color: var(--p4b); }
+  .card.c4 { background: var(--p5); border-color: var(--p5b); }
+  .card.c5 { background: var(--p6); border-color: var(--p6b); }
+  .card:hover:not(:disabled) { transform: translateY(-2px); }
   .card:active { transform: translateY(2px); }
   .card:disabled { cursor: default; }
   .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  .answer .card { border-color: var(--accent); }
   .buttons {
     display: flex;
     gap: 10px;
@@ -143,29 +181,40 @@
     font: inherit;
     font-size: 1rem;
     font-weight: bold;
-    border-radius: 10px;
-    padding: 12px 16px;
-    min-height: 50px;
+    border-radius: 999px;
+    padding: 12px 18px;
+    min-height: 52px;
     cursor: pointer;
-    border: 2px solid var(--accent);
+    border: 2px solid #eccbe0;
     background: #fff;
     color: var(--accent);
     touch-action: manipulation;
   }
   .btn.primary {
     flex: 1;
-    background: var(--accent);
+    border: none;
+    background: linear-gradient(90deg, #c2417f, #8250cc);
     color: #fff;
+    box-shadow: 0 4px 12px rgba(160, 70, 160, .25);
   }
-  .btn.primary:hover:not(:disabled) { background: var(--accent-dark); }
+  .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
   .btn:disabled { opacity: .45; cursor: default; }
   .result {
     margin-top: 16px;
-    border-radius: 12px;
+    border-radius: 18px;
     padding: 14px;
     display: none;
   }
-  .result.show { display: block; }
+  .result.show { display: block; animation: pop .35s ease-out; }
+  @keyframes pop {
+    0% { transform: scale(.92); opacity: 0; }
+    70% { transform: scale(1.02); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .result.show { animation: none; }
+    .card, .bar > span { transition: none; }
+  }
   .result.ok { background: var(--ok-bg); color: var(--ok); }
   .result.ng { background: var(--ng-bg); color: var(--ng); }
   .result .title { font-size: 1.3rem; font-weight: bold; }
@@ -188,8 +237,12 @@
     font-weight: bold;
     color: var(--accent);
     margin: 4px 0;
+    background: linear-gradient(90deg, #d9468f, #8a5cd6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .score small { font-size: 1.1rem; color: var(--muted); }
+  .score small { font-size: 1.1rem; -webkit-text-fill-color: var(--muted); }
   .comment { text-align: center; margin: 0 0 16px; }
   .review { list-style: none; padding: 0; margin: 0 0 18px; }
   .review li {
@@ -219,7 +272,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>英語 並べ替え問題</h1>
+    <h1><span class="deco" aria-hidden="true">🌈</span> 英語 並べ替え問題 <span class="deco" aria-hidden="true">✨</span></h1>
   </header>
 
   <!-- 問題画面 -->
@@ -346,7 +399,7 @@
   function makeCard(c, locked) {
     var b = document.createElement("button");
     b.type = "button";
-    b.className = "card";
+    b.className = "card c" + (c.id % 6);
     b.textContent = c.text;
     b.disabled = !!locked;
     return b;
@@ -420,7 +473,7 @@
     $("mainButtons").classList.add("hidden");
 
     if (ok) {
-      $("resultTitle").textContent = "〇 正解！";
+      $("resultTitle").textContent = "〇 正解！ 🎉";
       $("resultCorrect").innerHTML = "";
     } else if (revealed) {
       $("resultTitle").textContent = "× 不正解";
@@ -489,9 +542,9 @@
     $("scoreTotal").textContent = order.length;
     var rate = score / order.length;
     $("scoreComment").textContent =
-      rate === 1 ? "全問正解！すばらしい！" :
-      rate >= 0.7 ? "よくできました！まちがえた問題を復習しましょう。" :
-      "まちがえた問題をもう一度解いてみましょう。";
+      rate === 1 ? "全問正解！すばらしい！ 🎉" :
+      rate >= 0.7 ? "よくできました！ 🌟 まちがえた問題も復習しましょう。" :
+      "まちがえた問題をもう一度解いてみましょう。 💪";
 
     var wrong = order.filter(function (qi) { return firstResult[qi] !== true; });
     $("retryWrongBtn").classList.toggle("hidden", wrong.length === 0);
