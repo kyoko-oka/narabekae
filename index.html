@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>英語 並べ替え問題</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --panel: #ffffff;
+    --text: #1f2933;
+    --muted: #5f6b7a;
+    --line: #d6dce6;
+    --accent: #2f6fde;
+    --accent-dark: #1f55b3;
+    --card: #ffffff;
+    --card-border: #b9c6dc;
+    --answer-bg: #eef3fd;
+    --ok: #1d9a5b;
+    --ok-bg: #e5f6ec;
+    --ng: #d64545;
+    --ng-bg: #fdeaea;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", Meiryo, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px 16px 40px;
+  }
+  header h1 {
+    font-size: 1.25rem;
+    margin: 4px 0 12px;
+    text-align: center;
+  }
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .bar {
+    flex: 1;
+    height: 8px;
+    background: var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar > span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+    transition: width .3s;
+  }
+  .panel {
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 18px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  }
+  .qno {
+    font-weight: bold;
+    color: var(--accent);
+    font-size: 0.95rem;
+  }
+  .ja {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 4px 0 14px;
+  }
+  .label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+  .answer {
+    min-height: 64px;
+    border: 2px dashed var(--card-border);
+    background: var(--answer-bg);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .answer.ok { border-style: solid; border-color: var(--ok); background: var(--ok-bg); }
+  .answer.ng { border-style: solid; border-color: var(--ng); background: var(--ng-bg); }
+  .placeholder {
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 0 4px;
+  }
+  .end-mark {
+    font-size: 1.15rem;
+    font-weight: bold;
+    margin-left: -4px;
+  }
+  .pool {
+    min-height: 56px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .card {
+    font: inherit;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.1rem;
+    color: var(--text);
+    background: var(--card);
+    border: 2px solid var(--card-border);
+    border-bottom-width: 4px;
+    border-radius: 10px;
+    padding: 8px 14px;
+    min-height: 48px;
+    min-width: 48px;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .08s;
+  }
+  .card:active { transform: translateY(2px); }
+  .card:disabled { cursor: default; }
+  .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .answer .card { border-color: var(--accent); }
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    font: inherit;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 12px 16px;
+    min-height: 50px;
+    cursor: pointer;
+    border: 2px solid var(--accent);
+    background: #fff;
+    color: var(--accent);
+    touch-action: manipulation;
+  }
+  .btn.primary {
+    flex: 1;
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn.primary:hover:not(:disabled) { background: var(--accent-dark); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .result {
+    margin-top: 16px;
+    border-radius: 12px;
+    padding: 14px;
+    display: none;
+  }
+  .result.show { display: block; }
+  .result.ok { background: var(--ok-bg); color: var(--ok); }
+  .result.ng { background: var(--ng-bg); color: var(--ng); }
+  .result .title { font-size: 1.3rem; font-weight: bold; }
+  .result .correct {
+    color: var(--text);
+    margin-top: 6px;
+    font-size: 1rem;
+  }
+  .result .correct b {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.05rem;
+  }
+  .result .buttons { margin-top: 12px; }
+  .hidden { display: none !important; }
+
+  /* 結果画面 */
+  .score {
+    text-align: center;
+    font-size: 2.4rem;
+    font-weight: bold;
+    color: var(--accent);
+    margin: 4px 0;
+  }
+  .score small { font-size: 1.1rem; color: var(--muted); }
+  .comment { text-align: center; margin: 0 0 16px; }
+  .review { list-style: none; padding: 0; margin: 0 0 18px; }
+  .review li {
+    display: flex;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.95rem;
+  }
+  .review .mark { font-weight: bold; font-size: 1.1rem; width: 1.4em; flex-shrink: 0; text-align: center; }
+  .review .mark.ok { color: var(--ok); }
+  .review .mark.ng { color: var(--ng); }
+  .review .en { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+  .review .jp { color: var(--muted); font-size: 0.85rem; }
+  #summary .buttons { flex-direction: column-reverse; }
+  .howto {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  @media (max-width: 380px) {
+    .card { font-size: 1rem; padding: 6px 11px; }
+    .btn { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>英語 並べ替え問題</h1>
+  </header>
+
+  <!-- 問題画面 -->
+  <section id="quiz">
+    <div class="progress">
+      <span id="progressText">第1問 / 10問</span>
+      <div class="bar"><span id="progressBar"></span></div>
+    </div>
+
+    <div class="panel">
+      <p class="howto">単語カードをタップして、日本語に合う英文になるように並べましょう。並べたカードをタップすると下に戻せます。</p>
+      <div class="qno" id="qno">第1問</div>
+      <div class="ja" id="ja"></div>
+
+      <p class="label">あなたの解答</p>
+      <div class="answer" id="answer" aria-live="polite"></div>
+
+      <p class="label">単語カード</p>
+      <div class="pool" id="pool"></div>
+
+      <div class="buttons" id="mainButtons">
+        <button class="btn" id="resetBtn" type="button">リセット</button>
+        <button class="btn primary" id="checkBtn" type="button" disabled>答え合わせ</button>
+      </div>
+
+      <div class="result" id="result" aria-live="polite">
+        <div class="title" id="resultTitle"></div>
+        <div class="correct" id="resultCorrect"></div>
+        <div class="buttons">
+          <button class="btn" id="retryBtn" type="button">もう一度</button>
+          <button class="btn" id="showBtn" type="button">正解を見る</button>
+          <button class="btn primary" id="nextBtn" type="button">次の問題へ</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果画面 -->
+  <section id="summary" class="hidden">
+    <div class="panel">
+      <p class="label" style="text-align:center">結果（1回目の答え合わせで正解した数）</p>
+      <div class="score"><span id="scoreNum">0</span><small> / <span id="scoreTotal">10</span>問</small></div>
+      <p class="comment" id="scoreComment"></p>
+      <ul class="review" id="review"></ul>
+      <div class="buttons">
+        <button class="btn" id="retryWrongBtn" type="button">まちがえた問題だけ</button>
+        <button class="btn primary" id="restartBtn" type="button">最初からやり直す</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="questions.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // 出題する問題のリスト（QUESTIONS の番号）
+  var order = [];
+  var pos = 0;             // order の何番目を解いているか
+  var firstResult = {};    // 問題番号 -> 1回目の答え合わせの結果（true/false）
+  var checkedOnce = false; // この問題で答え合わせをしたか
+
+  // 現在の問題のカード（同じ単語が2つあっても区別できるよう id を付ける）
+  var cards = [];          // { id, text }
+  var placed = [];         // 解答欄に置いたカードの id（順番どおり）
+
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function sentence(q, words) {
+    return (words || q.words).join(" ") + (q.end || "");
+  }
+
+  function currentQ() { return QUESTIONS[order[pos]]; }
+
+  function start(list) {
+    order = list;
+    pos = 0;
+    firstResult = {};
+    $("summary").classList.add("hidden");
+    $("quiz").classList.remove("hidden");
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    var q = currentQ();
+    var n = pos + 1;
+    $("progressText").textContent = "第" + n + "問 / " + order.length + "問";
+    $("progressBar").style.width = (pos / order.length * 100) + "%";
+    $("qno").textContent = "第" + (order[pos] + 1) + "問";
+    $("ja").textContent = q.ja;
+
+    var base = q.words.map(function (w, i) { return { id: i, text: w }; });
+    // 正解と同じ並びにならないようにシャッフル
+    var shuffled = shuffle(base);
+    var tries = 0;
+    while (q.words.length > 1 && isCorrectOrder(q, shuffled.map(function (c) { return c.text; })) && tries < 20) {
+      shuffled = shuffle(base);
+      tries++;
+    }
+    cards = shuffled;
+    placed = [];
+    checkedOnce = false;
+    hideResult();
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function isCorrectOrder(q, words) {
+    var target = [q.words].concat(q.alt || []);
+    var s = words.join(" ");
+    return target.some(function (t) { return t.join(" ") === s; });
+  }
+
+  function makeCard(c, locked) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "card";
+    b.textContent = c.text;
+    b.disabled = !!locked;
+    return b;
+  }
+
+  function render() {
+    var q = currentQ();
+    var locked = $("result").classList.contains("show");
+    var answer = $("answer");
+    var pool = $("pool");
+    answer.innerHTML = "";
+    pool.innerHTML = "";
+
+    if (placed.length === 0) {
+      var ph = document.createElement("span");
+      ph.className = "placeholder";
+      ph.textContent = "ここに単語が並びます";
+      answer.appendChild(ph);
+    }
+    placed.forEach(function (id, idx) {
+      var c = findCard(id);
+      var b = makeCard(c, locked);
+      b.setAttribute("aria-label", c.text + "（タップで戻す）");
+      b.addEventListener("click", function () {
+        placed.splice(idx, 1);
+        render();
+      });
+      answer.appendChild(b);
+    });
+    if (placed.length > 0 && q.end) {
+      var end = document.createElement("span");
+      end.className = "end-mark";
+      end.textContent = q.end;
+      answer.appendChild(end);
+    }
+
+    cards.forEach(function (c) {
+      if (placed.indexOf(c.id) !== -1) return;
+      var b = makeCard(c, locked);
+      b.addEventListener("click", function () {
+        placed.push(c.id);
+        render();
+      });
+      pool.appendChild(b);
+    });
+
+    $("checkBtn").disabled = placed.length !== cards.length || locked;
+    $("resetBtn").disabled = placed.length === 0 || locked;
+  }
+
+  function findCard(id) {
+    for (var i = 0; i < cards.length; i++) if (cards[i].id === id) return cards[i];
+  }
+
+  function check() {
+    var q = currentQ();
+    var words = placed.map(function (id) { return findCard(id).text; });
+    var ok = isCorrectOrder(q, words);
+    if (!checkedOnce) {
+      firstResult[order[pos]] = ok;
+      checkedOnce = true;
+    }
+    showResult(ok, false);
+  }
+
+  function showResult(ok, revealed) {
+    var q = currentQ();
+    var res = $("result");
+    res.className = "result show " + (ok ? "ok" : "ng");
+    $("answer").className = "answer " + (ok ? "ok" : "ng");
+    $("mainButtons").classList.add("hidden");
+
+    if (ok) {
+      $("resultTitle").textContent = "〇 正解！";
+      $("resultCorrect").innerHTML = "";
+    } else if (revealed) {
+      $("resultTitle").textContent = "× 不正解";
+      $("resultCorrect").innerHTML = "";
+      $("resultCorrect").appendChild(document.createTextNode("正解： "));
+      var b = document.createElement("b");
+      b.textContent = sentence(q);
+      $("resultCorrect").appendChild(b);
+    } else {
+      $("resultTitle").textContent = "× 不正解";
+      $("resultCorrect").textContent = "もう一度チャレンジするか、正解を確認しましょう。";
+    }
+
+    $("retryBtn").classList.toggle("hidden", ok);
+    $("showBtn").classList.toggle("hidden", ok || revealed);
+    $("nextBtn").textContent = pos === order.length - 1 ? "結果を見る" : "次の問題へ";
+    render();
+  }
+
+  function hideResult() {
+    $("result").className = "result";
+    $("answer").className = "answer";
+    $("mainButtons").classList.remove("hidden");
+  }
+
+  function next() {
+    if (pos < order.length - 1) {
+      pos++;
+      loadQuestion();
+    } else {
+      showSummary();
+    }
+  }
+
+  function showSummary() {
+    $("progressBar").style.width = "100%";
+    $("quiz").classList.add("hidden");
+    $("summary").classList.remove("hidden");
+
+    var score = 0;
+    var list = $("review");
+    list.innerHTML = "";
+    order.forEach(function (qi) {
+      var q = QUESTIONS[qi];
+      var ok = firstResult[qi] === true;
+      if (ok) score++;
+      var li = document.createElement("li");
+      var mark = document.createElement("span");
+      mark.className = "mark " + (ok ? "ok" : "ng");
+      mark.textContent = ok ? "〇" : "×";
+      var body = document.createElement("div");
+      var en = document.createElement("div");
+      en.className = "en";
+      en.textContent = "第" + (qi + 1) + "問　" + sentence(q);
+      var jp = document.createElement("div");
+      jp.className = "jp";
+      jp.textContent = q.ja;
+      body.appendChild(en);
+      body.appendChild(jp);
+      li.appendChild(mark);
+      li.appendChild(body);
+      list.appendChild(li);
+    });
+
+    $("scoreNum").textContent = score;
+    $("scoreTotal").textContent = order.length;
+    var rate = score / order.length;
+    $("scoreComment").textContent =
+      rate === 1 ? "全問正解！すばらしい！" :
+      rate >= 0.7 ? "よくできました！まちがえた問題を復習しましょう。" :
+      "まちがえた問題をもう一度解いてみましょう。";
+
+    var wrong = order.filter(function (qi) { return firstResult[qi] !== true; });
+    $("retryWrongBtn").classList.toggle("hidden", wrong.length === 0);
+    window.scrollTo(0, 0);
+  }
+
+  function allIndexes() {
+    return QUESTIONS.map(function (_, i) { return i; });
+  }
+
+  $("checkBtn").addEventListener("click", check);
+  $("resetBtn").addEventListener("click", function () { placed = []; render(); });
+  $("retryBtn").addEventListener("click", function () { placed = []; hideResult(); render(); });
+  $("showBtn").addEventListener("click", function () { showResult(false, true); });
+  $("nextBtn").addEventListener("click", next);
+  $("restartBtn").addEventListener("click", function () { start(allIndexes()); });
+  $("retryWrongBtn").addEventListener("click", function () {
+    start(order.filter(function (qi) { return firstResult[qi] !== true; }));
+  });
+
+  start(allIndexes());
+})();
+</script>
+</body>
+</html>
