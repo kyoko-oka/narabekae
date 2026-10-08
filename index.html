@@ -227,6 +227,14 @@
     font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     font-size: 1.05rem;
   }
+  .result .exp {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #fff;
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+  .result .exp:empty { display: none; }
   .result .buttons { margin-top: 12px; }
   .hidden { display: none !important; }
 
@@ -301,6 +309,7 @@
       <div class="result" id="result" aria-live="polite">
         <div class="title" id="resultTitle"></div>
         <div class="correct" id="resultCorrect"></div>
+        <div class="exp" id="resultExp"></div>
         <div class="buttons">
           <button class="btn" id="retryBtn" type="button">もう一度</button>
           <button class="btn" id="showBtn" type="button">正解を見る</button>
@@ -374,7 +383,7 @@
     $("qno").textContent = "第" + (order[pos] + 1) + "問";
     $("ja").textContent = q.ja;
 
-    var base = q.words.map(function (w, i) { return { id: i, text: w }; });
+    var base = q.words.map(function (w, i) { return { id: i, text: cardText(q, w, i) }; });
     // 正解と同じ並びにならないようにシャッフル
     var shuffled = shuffle(base);
     var tries = 0;
@@ -390,10 +399,26 @@
     window.scrollTo(0, 0);
   }
 
+  // 文頭の語は小文字にしてカードにする（"I" と capital: true の問題はそのまま）
+  function cardText(q, w, i) {
+    if (i !== 0 || q.capital || w === "I") return w;
+    return w.charAt(0).toLowerCase() + w.slice(1);
+  }
+
+  // 文頭を小文字にしているので、大文字・小文字を区別せずに比べる
   function isCorrectOrder(q, words) {
     var target = [q.words].concat(q.alt || []);
-    var s = words.join(" ");
-    return target.some(function (t) { return t.join(" ") === s; });
+    var s = words.join(" ").toLowerCase();
+    return target.some(function (t) { return t.join(" ").toLowerCase() === s; });
+  }
+
+  function showCorrect(q) {
+    $("resultCorrect").innerHTML = "";
+    $("resultCorrect").appendChild(document.createTextNode("正解： "));
+    var b = document.createElement("b");
+    b.textContent = sentence(q);
+    $("resultCorrect").appendChild(b);
+    $("resultExp").textContent = q.exp ? "解説： " + q.exp : "";
   }
 
   function makeCard(c, locked) {
@@ -474,17 +499,14 @@
 
     if (ok) {
       $("resultTitle").textContent = "〇 正解！ 🎉";
-      $("resultCorrect").innerHTML = "";
+      showCorrect(q);
     } else if (revealed) {
       $("resultTitle").textContent = "× 不正解";
-      $("resultCorrect").innerHTML = "";
-      $("resultCorrect").appendChild(document.createTextNode("正解： "));
-      var b = document.createElement("b");
-      b.textContent = sentence(q);
-      $("resultCorrect").appendChild(b);
+      showCorrect(q);
     } else {
       $("resultTitle").textContent = "× 不正解";
       $("resultCorrect").textContent = "もう一度チャレンジするか、正解を確認しましょう。";
+      $("resultExp").textContent = "";
     }
 
     $("retryBtn").classList.toggle("hidden", ok);
